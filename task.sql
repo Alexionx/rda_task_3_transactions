@@ -4,16 +4,22 @@ USE ShopDB;
 -- Start the transaction 
 START TRANSACTION; 
 
-INSERT INTO Orders (CustomerID, Date) 
-VALUES (1, '2023-01-01');
+SELECT WarehouseAmount INTO @Stock FROM Products WHERE ID = 1;
 
-SET @OrderID = LAST_INSERT_ID();
+IF @Stock >= 1 THEN
+    INSERT INTO Orders (CustomerID, Date) 
+    VALUES (1, '2023-01-01');
 
-INSERT INTO OrderItems (OrderID, ProductID, Count) 
-VALUES (@OrderID, 1, 1);
+    SET @OrderID = LAST_INSERT_ID();
 
-UPDATE Products 
-SET WarehouseAmount = WarehouseAmount - 1 
-WHERE ID = 1;
+    INSERT INTO OrderItems (OrderID, ProductID, Count) 
+    VALUES (@OrderID, 1, 1);
 
-COMMIT; 
+    UPDATE Products 
+    SET WarehouseAmount = WarehouseAmount - 1 
+    WHERE ID = 1;
+
+    COMMIT;
+ELSE
+    ROLLBACK;
+END IF;
